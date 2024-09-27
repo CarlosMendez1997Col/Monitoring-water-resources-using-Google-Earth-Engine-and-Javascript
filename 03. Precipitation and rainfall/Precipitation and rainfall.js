@@ -10,11 +10,9 @@ var endYear = 2020;
 var startDate = ee.Date.fromYMD(startYear, 1, 1);
 var endDate = ee.Date.fromYMD(endYear + 1, 1, 1);
 var years = ee.List.sequence(startYear, endYear);
-
 var months = ee.List.sequence(1, 12);
 var CHIRPS = ee.ImageCollection('UCSB-CHG/CHIRPS/PENTAD');
 
-// Filter for the relevant time period.
 CHIRPS = CHIRPS.filterDate(startDate, endDate);
 
 var monthlyPrecip = ee.ImageCollection.fromImages(
@@ -33,13 +31,9 @@ var monthlyPrecip = ee.ImageCollection.fromImages(
 );
 
 var precipVis = {min: 0, max: 250, palette: 'white, blue, darkblue, red, purple'};
-
 Map.addLayer(monthlyPrecip.mean().clip(Basin), precipVis, '2015 precipitation');
 
-var title = {
-    title: 'Monthly precipitation',
-    hAxis: {title: 'Time'},
-    vAxis: {title: 'Precipitation (mm)'},
+var title = {title: 'Monthly precipitation', hAxis: {title: 'Time'}, vAxis: {title: 'Precipitation (mm)'},
 };
 
 var chartMonthly = ui.Chart.image.seriesByRegion({
