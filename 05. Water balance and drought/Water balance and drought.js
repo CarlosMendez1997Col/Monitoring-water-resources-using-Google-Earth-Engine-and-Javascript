@@ -1,4 +1,4 @@
-
+////////////////////////////////////////////////////////////////// TIME SERIES OF EVAPOTRANSPIRATION  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 var hydrobasins = ee.FeatureCollection("WWF/HydroSHEDS/v1/Basins/hybas_4");
 var Basin = hydrobasins.filter(ee.Filter.eq('HYBAS_ID', 6040752470))
