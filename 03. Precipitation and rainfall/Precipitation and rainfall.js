@@ -1,3 +1,60 @@
+////////////////////////////////////////////////////////////////// TIME SERIES OF PRECIPITATION  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+var hydrobasins = ee.FeatureCollection("WWF/HydroSHEDS/v1/Basins/hybas_4");
+var Basin = hydrobasins.filter(ee.Filter.eq('HYBAS_ID', 6040752470))
+
+Map.centerObject(Basin, 5);
+Map.addLayer(Basin, {}, 'Basin');
+
+var startYear = 2010;
+var endYear = 2020;
+var startDate = ee.Date.fromYMD(startYear, 1, 1);
+var endDate = ee.Date.fromYMD(endYear + 1, 1, 1);
+var years = ee.List.sequence(startYear, endYear);
+
+var months = ee.List.sequence(1, 12);
+var CHIRPS = ee.ImageCollection('UCSB-CHG/CHIRPS/PENTAD');
+
+// Filter for the relevant time period.
+CHIRPS = CHIRPS.filterDate(startDate, endDate);
+
+var monthlyPrecip = ee.ImageCollection.fromImages(
+    years.map(function(y) {
+        return months.map(function(m) {
+            var w = CHIRPS.filter(ee.Filter
+                    .calendarRange(y, y, 'year'))
+                .filter(ee.Filter.calendarRange(m, m,'month'))
+                .sum();
+            return w.set('year', y)
+                .set('month', m)
+                .set('system:time_start', ee.Date
+                    .fromYMD(y, m, 1));
+        });
+    }).flatten()
+);
+
+var precipVis = {min: 0, max: 250, palette: 'white, blue, darkblue, red, purple'};
+
+Map.addLayer(monthlyPrecip.mean().clip(Basin), precipVis, '2015 precipitation');
+
+var title = {
+    title: 'Monthly precipitation',
+    hAxis: {title: 'Time'},
+    vAxis: {title: 'Precipitation (mm)'},
+};
+
+var chartMonthly = ui.Chart.image.seriesByRegion({
+        imageCollection: monthlyPrecip,
+        regions: Basin.geometry(),
+        reducer: ee.Reducer.mean(),
+        band: 'precipitation',
+        scale: 5000,
+        xProperty: 'system:time_start'
+    }).setSeriesNames(['P'])
+    .setOptions(title)
+    .setChartType('ColumnChart');
+
+print(chartMonthly);
+
 ////////////////////////////////////////////////////////////////// MONTHLY RAINFALL  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 var chirps = ee.ImageCollection("UCSB-CHG/CHIRPS/PENTAD");
