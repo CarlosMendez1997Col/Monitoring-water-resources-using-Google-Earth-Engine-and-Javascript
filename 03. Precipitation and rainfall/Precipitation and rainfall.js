@@ -20,11 +20,11 @@ var monthlyPrecip = ee.ImageCollection.fromImages(
         return months.map(function(m) {
             var w = CHIRPS.filter(ee.Filter
                     .calendarRange(y, y, 'year'))
-                .filter(ee.Filter.calendarRange(m, m,'month'))
-                .sum();
+                    .filter(ee.Filter.calendarRange(m, m,'month'))
+                    .sum();
             return w.set('year', y)
-                .set('month', m)
-                .set('system:time_start', ee.Date
+                    .set('month', m)
+                    .set('system:time_start', ee.Date
                     .fromYMD(y, m, 1));
         });
     }).flatten()
@@ -44,8 +44,8 @@ var chartMonthly = ui.Chart.image.seriesByRegion({
         scale: 5000,
         xProperty: 'system:time_start'
     }).setSeriesNames(['P'])
-    .setOptions(title)
-    .setChartType('ColumnChart');
+      .setOptions(title)
+      .setChartType('ColumnChart');
 
 print(chartMonthly);
 
