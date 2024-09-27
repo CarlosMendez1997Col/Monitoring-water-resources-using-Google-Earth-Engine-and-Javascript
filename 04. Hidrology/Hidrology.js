@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////// RIVER MORPHOLOGY \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+////////////////////////////////////////////////////////////////// RIVER TIME SERIES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 var getUTMProj = function(lon, lat) 
 {
@@ -60,10 +60,11 @@ Map.addLayer(polygon, {}, 'area of width calculation');
 ////////////////////////////////////////////////////////////////// CHANGES IN A RIVER \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 var aoi = ee.Geometry.Polygon(
-        [[[-66.75498758257174, -11.090110301403685],
-          [-66.75498758257174, -11.258517279582335],
-          [-66.56650339067721, -11.258517279582335],
-          [-66.56650339067721, -11.090110301403685]]], null, false);
+        [[[-70.11457239092135, -4.162988139427442],
+          [-70.11457239092135, -4.449195454215346],
+          [-69.62430749834323, -4.449195454215346],
+          [-69.62430749834323, -4.162988139427442]]], null, false);
+
 var sword = ee.FeatureCollection("projects/gee-book/assets/A2-4/SWORD");
 
 var getUTMProj = function(lon, lat) {
@@ -86,12 +87,9 @@ var rpj = function(image)
 };
 
 var jrcYearly = ee.ImageCollection('JRC/GSW1_3/YearlyHistory');
-
 var watermask = jrcYearly.filter(ee.Filter.eq('year', 2000)).first()
     .gte(2).unmask(0)
     .clip(aoi);
-
-Map.centerObject(aoi);
 
 watermask = watermask.focal_max().focal_min();
 
@@ -99,8 +97,8 @@ var MIN_SIZE = 2E3;
 var barPolys = watermask.not().selfMask()
     .reduceToVectors({ geometry: aoi, scale: 15, eightConnected: true})
     .filter(ee.Filter.lte('count', MIN_SIZE)); // Get small polys.
+    
 var filled = watermask.paint(barPolys, 1);
-
 var costmap = filled.not().cumulativeCost({
     source: watermask.and(ee.Image().toByte().paint(sword,1)),
     maxDistance: 3E3,
@@ -110,10 +108,10 @@ var costmap = filled.not().cumulativeCost({
 var rivermask = costmap.eq(0).rename('riverMask');
 var channelmask = rivermask.and(watermask);
 
-Map.addLayer(watermask, {}, 'watermask', true);
-Map.addLayer(rpj(filled), { min: 0, max: 1}, 'filled water mask', true);
+Map.centerObject(aoi);
+Map.addLayer(watermask, {}, 'watermask', false);
+Map.addLayer(rpj(filled), { min: 0, max: 1}, 'filled water mask', false);
 Map.addLayer(sword, {color: 'red'}, 'sword', true);
-
 Map.addLayer(rpj(costmap), {min: 0, max: 1E3}, 'costmap', true);
 Map.addLayer(rpj(rivermask), {}, 'rivermask', true);
 Map.addLayer(rpj(channelmask), {}, 'channelmask', true);
