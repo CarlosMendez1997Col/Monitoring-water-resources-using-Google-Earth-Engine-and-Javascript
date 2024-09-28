@@ -2,10 +2,6 @@
 
 var hydrobasins = ee.FeatureCollection("WWF/HydroSHEDS/v1/Basins/hybas_4");
 var Basin = hydrobasins.filter(ee.Filter.eq('HYBAS_ID', 6040752470))
-
-Map.centerObject(Basin, 5);
-Map.addLayer(Basin, {}, 'Basin');
-
 var startYear = 2010;
 var endYear = 2020;
 var startDate = ee.Date.fromYMD(startYear, 1, 1);
@@ -32,13 +28,9 @@ var monthlyEvap = ee.ImageCollection.fromImages(
 );
 
 var evapVis = { min: 0, max: 140, palette: 'red, orange, yellow, blue, darkblue'};
-
-Map.addLayer(monthlyEvap.mean().clip(Basin), evapVis,'Mean monthly ET');
-
 var title = { title: 'Monthly evapotranspiration', hAxis: { title: 'Time'},
               vAxis: {title: 'Evapotranspiration (mm)'},
-             colors: ['red']
-};
+             colors: ['red']};
 
 var chartMonthly = ui.Chart.image.seriesByRegion({
         imageCollection: monthlyEvap,
@@ -51,5 +43,16 @@ var chartMonthly = ui.Chart.image.seriesByRegion({
       .setOptions(title)
       .setChartType('ColumnChart');
 
+Map.centerObject(Basin, 5);
+Map.addLayer(Basin, {}, 'Basin');
+Map.addLayer(monthlyEvap.mean().clip(Basin), evapVis,'Mean monthly ET');
+
 print(chartMonthly);
+
+////////////////////////////////////////////////////////////////// WATER BALANCE  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+
+
+
 
