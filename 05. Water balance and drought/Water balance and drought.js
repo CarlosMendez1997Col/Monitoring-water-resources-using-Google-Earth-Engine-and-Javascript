@@ -51,7 +51,57 @@ print(chartMonthly);
 
 ////////////////////////////////////////////////////////////////// WATER BALANCE  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+var hydrobasins = ee.FeatureCollection("WWF/HydroSHEDS/v1/Basins/hybas_4");
+var Basin = hydrobasins.filter(ee.Filter.eq('HYBAS_ID', 6040752470))
+var startYear = 2010;
+var endYear = 2020;
+var startDate = ee.Date.fromYMD(startYear, 1, 1);
+var endDate = ee.Date.fromYMD(endYear + 1, 1, 1);
+var years = ee.List.sequence(startYear, endYear);
+var months = ee.List.sequence(1, 12);
+var CHIRPS = ee.ImageCollection('UCSB-CHG/CHIRPS/PENTAD');
 
+CHIRPS = CHIRPS.filterDate(startDate, endDate);
+var mod16 = ee.ImageCollection('MODIS/006/MOD16A2').select('ET');
+mod16 = mod16.filterDate(startDate, endDate);
+var waterBalance = ee.ImageCollection.fromImages(
+                years.map(function(y) {
+        return months.map(function(m) {
+            var P = CHIRPS.filter(ee.Filter.calendarRange(y, y, 'year'))
+                          .filter(ee.Filter.calendarRange(m, m,'month'))
+                          .sum();
+            var ET = mod16.filter(ee.Filter
+                          .calendarRange(y, y, 'year'))
+                          .filter(ee.Filter.calendarRange(m, m,'month'))
+                          .sum()
+                          .multiply(0.1);
+            var wb = P.subtract(ET).rename('wb');
+        return wb.set('year', y)
+                 .set('month', m)
+                 .set('system:time_start', ee.Date
+                 .fromYMD(y, m, 1));
+        });
+    }).flatten()
+);
+var balanceVis = { min: -50, max: 200, palette: 'red, orange, yellow, blue, darkblue, purple'};
+var title = {title: 'Monthly water balance', hAxis: {title: 'Time'},
+    vAxis: {title: 'Evapotranspiration (mm)'},
+    colors: ['green']
+};
+var chartMonthly = ui.Chart.image.seriesByRegion({
+        imageCollection: waterBalance,
+        regions: Basin.geometry(),
+        reducer: ee.Reducer.mean(),
+        band: 'wb',
+        scale: 500,
+        xProperty: 'system:time_start'}).setSeriesNames(['WB'])
+                                        .setOptions(title)
+                                        .setChartType('ColumnChart');
+
+print(chartMonthly);
+Map.centerObject(Basin, 5);
+Map.addLayer(Basin, {}, 'Basin');
+Map.addLayer(waterBalance.mean().clip(Basin), balanceVis,'Mean monthly water balance');
 
 
 
