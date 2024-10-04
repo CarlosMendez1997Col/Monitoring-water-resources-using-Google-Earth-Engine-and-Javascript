@@ -47,16 +47,16 @@ ee.ImageCollection('NASA/GRACE/MASS_GRIDS/MASCON_CRI')
 
 ## Credits and repository of data
 
-The original code, repositories and courses used in this project, are available at:
+The original code, repositories and scripts used in this project, are available at:
 
-- Google Earth Engine for Water Resources Management (Full Course)
-[link](https://courses.spatialthoughts.com/gee-water-resources-management.html)
+- Google Earth Engine for Water Resources Management (Full Course), Author `Spatial Thoughts`
+[Website](https://courses.spatialthoughts.com/gee-water-resources-management.html)
 
-- Aquatic and Hydrological Applications [link](https://google-earth-engine.com/Aquatic-and-Hydrological-Applications/Water-Balance-and-Drought/)
+- Aquatic and Hydrological Applications, Author `gee-tutorials` [Website](https://google-earth-engine.com/Aquatic-and-Hydrological-Applications/Water-Balance-and-Drought/) [Github Repository](https://github.com/krishnakafle/gee-tutorials.git)
 
-- Remote Sensing for Water Resources in Earth Engine [link](https://courses.spatialelearning.com/p/remote-sensing-for-water-resources-in-google-earth-engine)
+- Remote Sensing for Water Resources in Earth Engine, Author `Spatial eLearning` [Website](https://courses.spatialelearning.com/p/remote-sensing-for-water-resources-in-google-earth-engine)
 
-- Google Earth Engine for Water Resources [link](https://youtube.com/playlist?list=PLmk0fUBXB9t2JKMd9rooggrJJCf7t8_hW&feature=shared)
+- Google Earth Engine for Water Resources, Author `Study Hacks-Institute of GIS & Remote Sensing` [Website](https://www.youtube.com/@gisrsinstitute)
 
 ## Conflict of Interest.
 
