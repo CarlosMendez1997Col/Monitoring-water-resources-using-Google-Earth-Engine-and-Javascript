@@ -26,7 +26,7 @@ var GetNearestClGen = function(poi)
     return temp;
 };
 var getNearestCl = GetNearestClGen(poi);
-// Multitemporal width extraction.
+
 var polygon = poi.buffer(2000);
 var coords = poi.centroid().coordinates();
 var lon = coords.get(0);
@@ -37,15 +37,14 @@ var scale = ee.Number(30);
 var multiwidths = ee.FeatureCollection(jrcYearly.map(function(i) 
 {
     var watermask = i.gte(2).unmask(0);
-    watermask = ee.Image(watermask.rename(['waterMask'])
-        .setMulti({crs: crs, scale: scale, image_id: i.getNumber('year')}));
+    watermask = ee.Image(watermask.rename(['waterMask']).setMulti({crs: crs, scale: scale, image_id: i.getNumber('year')}));
     var rwc = rwcFunction.rwGen_waterMask(2000, 333, 300,polygon);
     var widths = rwc(watermask).filter(ee.Filter.eq('endsInWater', 0))
                                .filter(ee.Filter.eq('endsOverEdge', 0));
     return ee.Algorithms.If(widths.size(), getNearestCl(widths), null);
 }, true));
 
-var widthTs = ui.Chart.feature.byFeature(multiwidths, 'image_id', ['width']) .setOptions(
+var widthTs = ui.Chart.feature.byFeature(multiwidths,'image_id',['width']).setOptions(
   {
         hAxis: { title: 'Year', format: '####'},
         vAxis: { title: 'Width (meter)'},
@@ -53,9 +52,9 @@ var widthTs = ui.Chart.feature.byFeature(multiwidths, 'image_id', ['width']) .se
   }
 );
 print(widthTs);
+Map.setOptions('SATELLITE')
 Map.centerObject(polygon);
 Map.addLayer(polygon, {}, 'area of width calculation');
-
 
 ////////////////////////////////////////////////////////////////// CHANGES IN A RIVER \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
@@ -96,7 +95,7 @@ watermask = watermask.focal_max().focal_min();
 var MIN_SIZE = 2E3;
 var barPolys = watermask.not().selfMask()
     .reduceToVectors({ geometry: aoi, scale: 15, eightConnected: true})
-    .filter(ee.Filter.lte('count', MIN_SIZE)); // Get small polys.
+    .filter(ee.Filter.lte('count', MIN_SIZE));
     
 var filled = watermask.paint(barPolys, 1);
 var costmap = filled.not().cumulativeCost({
@@ -108,6 +107,7 @@ var costmap = filled.not().cumulativeCost({
 var rivermask = costmap.eq(0).rename('riverMask');
 var channelmask = rivermask.and(watermask);
 
+Map.setOptions('SATELLITE')
 Map.centerObject(aoi);
 Map.addLayer(watermask, {}, 'watermask', false);
 Map.addLayer(rpj(filled), { min: 0, max: 1}, 'filled water mask', false);
@@ -115,4 +115,3 @@ Map.addLayer(sword, {color: 'red'}, 'sword', true);
 Map.addLayer(rpj(costmap), {min: 0, max: 1E3}, 'costmap', true);
 Map.addLayer(rpj(rivermask), {}, 'rivermask', true);
 Map.addLayer(rpj(channelmask), {}, 'channelmask', true);
-
